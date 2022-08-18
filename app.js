@@ -1,5 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const User = require('./models/user');
+const Card = require('./models/card');
 
 const app = express();
 const port = 3000;
