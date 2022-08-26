@@ -1,13 +1,16 @@
 const express = require('express');
-const mongoose = require('mongoose');
-const User = require('./models/user');
-const Card = require('./models/card');
 
 const app = express();
-const port = 3000;
-app.get('/', (req, res) => {
-  res.send('Mesto!');
-});
+const mongoose = require('mongoose');
+const Card = require('./models/card');
+const route = require('./routes/users');
 
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
+
+const port = 3000;
+
+app.use('/', route);
 app.listen(port);
-mongoose.connect('mongodb://localhost:27017/mestodb');
