@@ -6,12 +6,13 @@ const router = express.Router();
 
 let cards;
 let allCards;
+const id = '630dbf0536a1faa78d8256c2';
 
 router.post('/cards', (req, res) => {
   cards = Card({
     name: req.body.name,
     link: req.body.link,
-    owner: new mongoose.Types.ObjectId('630dbf0536a1faa78d8256c2'),
+    owner: new mongoose.Types.ObjectId(id),
   });
   cards.save();
   res.send(req.body);
@@ -28,6 +29,15 @@ router.get('/cards', (req, res) => {
 
 router.delete('/cards/:cardsId', (req, res) => {
  Card.findByIdAndDelete(req.params.cardsId).exec();
+  res.end();
+});
+
+router.put('/cards/:cardsId/likes', (req, res) => {
+  Card.findByIdAndUpdate(req.params.cardsId, { $addToSet: { likes: id } }, { new: true }).exec();
+  res.end();
+});
+router.delete('/cards/:cardsId/likes', (req, res) => {
+  Card.findByIdAndUpdate(req.params.cardsId, { $pull: { likes: id } }, { new: true }).exec();
   res.end();
 });
 module.exports = router;

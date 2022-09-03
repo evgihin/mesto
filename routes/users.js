@@ -31,4 +31,22 @@ router.get('/users/:userId', (req, res) => {
   });
   res.send(byId);
 });
+router.patch('/users/me', (req, res) => {
+  const condition = { name: req.body.find };
+  const update = {
+    name: req.body.name,
+    about: req.body.about,
+    avatar: req.body.avatar,
+  };
+  User.findOneAndUpdate(condition, update).exec();
+  res.end();
+});
+router.patch('/users/me/avatar', (req, res) => {
+  const condition = { name: req.body.find };
+  const update = {
+    avatar: req.body.avatar,
+  };
+  User.findOneAndUpdate(condition, update).exec();
+  res.end();
+});
 module.exports = router;
