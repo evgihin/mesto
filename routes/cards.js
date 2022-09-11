@@ -8,14 +8,18 @@ let cards;
 let allCards;
 const id = '630dbf0536a1faa78d8256c2';
 
-router.post('/cards', (req, res) => {
+router.post('/cards', async (req, res, next) => {
   cards = Card({
     name: req.body.name,
     link: req.body.link,
     owner: new mongoose.Types.ObjectId(id),
   });
-  cards.save();
-  res.send(req.body);
+  try {
+    await cards.save();
+  } catch (err) {
+    res.status(400).send('Некоректные данные');
+    next(err);
+  }
   res.end();
 });
 

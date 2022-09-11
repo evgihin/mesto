@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const express = require('express');
 const User = require('../models/user');
 
@@ -6,15 +7,21 @@ const router = express.Router();
 let users;
 let allUsers;
 let byId;
+let result;
+let errors;
 
-router.post('/users', (req, res) => {
+router.post('/users', async (req, res, next) => {
   users = User({
     name: req.body.name,
     about: req.body.about,
     avatar: req.body.avatar,
   });
-  users.save();
-  res.send(req.body);
+  try {
+    await users.save();
+  } catch (err) {
+    res.status(400).send('Некоректные данные');
+    next(err);
+  }
   res.end();
 });
 
@@ -25,28 +32,68 @@ router.get('/users', (req, res) => {
   res.send(allUsers);
 });
 
-router.get('/users/:userId', (req, res) => {
-  User.findById(req.params.userId).select('name about avatar').exec(function (err, User){
-    byId = User;
+router.get('/users/:userId', async (req, res, next) => {
+  User.findById(req.params.userId).select('name about avatar').exec((err, User) =>{
+    if (!User) {
+      if (err) {
+        res.status(400).send('Некоректные данные');
+        next(err);
+      } else {
+        res.status(404).send('Пользователь не найден');
+        try {
+          throw new Error('User not found');
+        } catch (error) {
+          next(error);
+        }
+      }
+    } else {
+      res.send(User);
+    }
   });
-  res.send(byId);
 });
-router.patch('/users/me', (req, res) => {
+router.patch('/users/me', (req, res, next) => {
+  const options = { runValidators: true };
   const condition = { name: req.body.find };
   const update = {
     name: req.body.name,
     about: req.body.about,
     avatar: req.body.avatar,
   };
-  User.findOneAndUpdate(condition, update).exec();
-  res.end();
+  User.findOneAndUpdate(condition, update, options).exec((err, User) => {
+    if (!User) {
+      if (err) {
+        res.status(400).send('Некоректные данные');
+        next(err);
+      } else {
+        res.status(404).send('Пользователь не найден');
+        try {
+          throw new Error('User not found');
+        } catch (error) {
+          next(error);
+        }
+      }
+    } else {
+      res.send(User);
+    }
+  });
 });
-router.patch('/users/me/avatar', (req, res) => {
+
+router.patch('/users/me/avatar', (req, res, next) => {
   const condition = { name: req.body.find };
   const update = {
     avatar: req.body.avatar,
   };
-  User.findOneAndUpdate(condition, update).exec();
-  res.end();
+  User.findOneAndUpdate(condition, update).exec((err, User) => {
+    if (!User) {
+      res.status(404).send('Пользователь не найден');
+      try {
+        throw new Error('User not found');
+      } catch (error) {
+        next(error);
+      }
+    } else {
+      res.send(User.avatar);
+    }
+  });
 });
 module.exports = router;
